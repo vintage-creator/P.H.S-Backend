@@ -1,0 +1,27 @@
+# Virtual Environment
+venv/
+
+# Database
+db.sqlite3
+
+# Static and Media Files
+staticfiles/
+media/
+
+# Compiled Python Files
+*.pyc
+__pycache__/
+
+# Secrets and Sensitive Information
+.env
+*.pyc
+*.pyo
+*.pyc
+__pycache__
+pyvenv.cfg
+Lib/
+
+
+
+
+
