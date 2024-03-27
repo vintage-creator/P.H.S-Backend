@@ -1,4 +1,3 @@
-import uuid, base64
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.conf import settings
@@ -9,12 +8,8 @@ from .serializers import handyman_serializer, ContactFormSerializer
 from django.core.mail import send_mail
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
 from .utils.data_access import get_handyman_user_info
 from .utils.custom_token_gen import custom_token_generator
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_decode
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from . import models
 from django.contrib.auth import get_user_model 
 
-User = get_user_model()  # Get the custom user model
+User = get_user_model() 
 
 class handyman_serializer(serializers.ModelSerializer):
     class Meta:
