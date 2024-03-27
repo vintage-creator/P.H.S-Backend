@@ -7,4 +7,4 @@ set -o errexit
 pip install -r requirements.txt
 
 # Apply migrations
-python handyman_project/manage.py migrate
+python manage.py migrate
