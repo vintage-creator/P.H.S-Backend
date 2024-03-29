@@ -19,6 +19,7 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}}
         
     def create(self, validated_data):
+        print('Validated Data: %s', validated_data)
         # Remove the password from the validated data
         password = validated_data.pop('password', None)
         # Create the user instance
