@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .utils.data_access import get_handyman_user_info
 from .utils.custom_token_gen import custom_token_generator
+from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
@@ -20,6 +21,21 @@ User = get_user_model()
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
+
+    def get_response_data(self, user):
+        try:
+            social_account = SocialAccount.objects.get(user=user)
+            profile_name = social_account.extra_data.get('name', '')
+            return {'profile_name': profile_name}
+        except SocialAccount.DoesNotExist:
+            return {'error': 'Social account not found'}
+
+    def post(self, request, *args, **kwargs):
+        self.serializer = self.get_serializer(data=request.data)
+        self.serializer.is_valid(raise_exception=True)
+        self.login()
+        response_data = self.get_response_data(self.user)
+        return Response(response_data)
 
 
 class handymanListCreateAPIView(generics.ListCreateAPIView):
