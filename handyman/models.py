@@ -45,3 +45,4 @@ class ContactForm(models.Model):
     email = models.EmailField()
     message = models.TextField()
     phone_number = models.CharField(max_length=20, blank=True, null=True) 
+    image = models.ImageField(upload_to='contact_images/', blank=True, null=True)

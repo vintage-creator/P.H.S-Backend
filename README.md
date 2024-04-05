@@ -11,6 +11,7 @@
     <ul>
         <li><a href="#request-token">Request Token</a></li>
         <li><a href="#sign-up">Sign Up</a></li>
+        <li><a href="#logout">Logout</a></li>
     </ul>
     <li><a href="#database">Database</a></li>
 </ul>
@@ -29,6 +30,7 @@
     <li><strong>Verify Token:</strong> <code>/verify-token/</code> - Required Payloads: token, user_id</li>
     <li><strong>Reset Password:</strong> <code>/reset-password/</code> - Required Payloads: user_id, new_password, confirm_password</li>
     <li><strong>OAuth Google Authentication:</strong> <code>/accounts/google/login/callback/</code> - For signin/signup using Google email accounts.</li>
+    <li><strong>Logout:</strong> <code>/authtoken/token/logout</code> - This is an authenticated route. Once a logout is successful, the response will be 204, "No Content", which means the token has been destroyed and the frontend can navigate to the login page.</li>
 </ul>
 <h2 id="authentication">Authentication</h2>
 <p>To access protected endpoints, authentication is required. Users can sign up to receive credentials or log in to receive an auth_token. The token should be provided as "Token {token_value}" in the header of API calls to protected endpoints.</p>
@@ -40,7 +42,11 @@
 <ul>
     <li><strong>Register as a New User:</strong> <code>/auth/users/</code> - Provides access to the service by creating a new user account.</li>
 </ul>
+<h3 id="logout">Logout</h3>
+<ul>
+    <li><strong>Logout and Destroy Token:</strong> <code>/authtoken/token/logout</code> - Authenticated route for securely logging out. A successful logout will return a 204 "No Content" response, indicating that the token has been successfully destroyed.</li>
+</ul>
 <h2 id="database">Database</h2>
 <p>The backend server utilizes PostgreSQL as its database system, ensuring reliability and scalability for storing user information, service appointments, and other relevant data.</p>
-<p>For more information on endpoints, including request and response formats, refer to our comprehensive API documentation or reach out to our support team. Our backend is built with the Python's Django REST Framework, offering robust and scalable solutions for managing handyman service appointments and user interactions.</p>
+<p>For more information on endpoints, including request and response formats, refer to our comprehensive API documentation or reach out to our support team. Our backend is built with Python's Django REST Framework, offering robust and scalable solutions for managing handyman service appointments and user interactions.</p>
 <p>Base URL for the endpoints: <a href="https://princehandymanservices.onrender.com">https://princehandymanservices.onrender.com</a></p>

@@ -32,6 +32,7 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 
 
 class ContactFormSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)
     class Meta:
         model = models.ContactForm
-        fields = ['name', 'email', 'message', 'phone_number']
+        fields = ['name', 'email', 'message', 'phone_number', 'image']

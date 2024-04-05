@@ -5,8 +5,10 @@ from rest_framework import generics
 from .models import Handyman
 from .permissions import CustomPermission
 from .serializers import handyman_serializer, ContactFormSerializer
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from rest_framework.decorators import api_view
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
 from .utils.data_access import get_handyman_user_info
 from .utils.custom_token_gen import custom_token_generator
@@ -14,6 +16,8 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
+from django.core.exceptions import ValidationError
+from .utils.validate_image import validate_image_file_size
 
 
 User = get_user_model()
@@ -68,7 +72,7 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
             """
 
             from_email =  settings.DEFAULT_FROM_EMAIL
-            send_mail(subject, message, from_email, [to_email], fail_silently=False)
+            EmailMessage(subject, message, from_email, [to_email], fail_silently=False)
             print("Email sent!")
 
 
@@ -87,22 +91,44 @@ def contact_form(request):
         if serializer.is_valid(raise_exception=True):
             data = serializer.validated_data
 
-            # Send email
+            # Prepare email message
             subject = 'New Contact Form Submission'
             email_message = f"""
-            Name: {data['name']}
-            Email: {data['email']}
-            Message: {data['message']}
-            Phone Number: {data.get('phone_number', '')}
+            <p><strong>Name:</strong> {data['name']}</p>
+            <p><strong>Email:</strong> {data['email']}</p>
+            <p><strong>Message:</strong> {data['message']}</p>
+            <p><strong>Phone Number:</strong> {data.get('phone_number', '')}</p>
             """
 
-            send_mail(
-                subject,
-                email_message,
-                settings.DEFAULT_FROM_EMAIL,
-                ["chuksy3@gmail.com"],
-                fail_silently=False,
-            )
+            # Check if an image is attached
+            if 'image' in request.FILES:
+                image_file = request.FILES['image']
+                try:
+                    # Validate the image size
+                    validate_image_file_size(image_file)
+                except ValidationError as e:
+                    return Response({'error': str(e)}, status=400)
+                
+                email_message += """
+                <p>This customer is making an inquiry. Attached is the image:</p>
+                """
+
+                # Create EmailMessage instance
+                email = EmailMessage(
+                    subject,
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    ["chuksy3@gmail.com"],
+                )
+
+                # Attach image if provided
+                if 'image' in request.FILES:
+                    image_file = request.FILES['image']
+                    email.attach(image_file.name, image_file.read(), image_file.content_type)
+
+                # Send email
+                email.content_subtype = 'html'
+                email.send(fail_silently=False)
 
             return Response({'message': 'Your message has been sent.'})
         return Response(serializer.errors, status=400)
@@ -121,7 +147,7 @@ def forgot_password(request):
             user.password_reset_token = token
             user.save()
         try:
-            send_mail(
+            EmailMessage(
                 'Password Reset Request',
                 f'Use this token to reset your password: {token}',
                 settings.DEFAULT_FROM_EMAIL,
