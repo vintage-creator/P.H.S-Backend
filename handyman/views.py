@@ -7,7 +7,6 @@ from .permissions import CustomPermission
 from .serializers import handyman_serializer, ContactFormSerializer
 from django.core.mail import EmailMessage
 from rest_framework.decorators import api_view
-from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
 from .utils.data_access import get_handyman_user_info
@@ -72,7 +71,8 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
             """
 
             from_email =  settings.DEFAULT_FROM_EMAIL
-            EmailMessage(subject, message, from_email, [to_email], fail_silently=False)
+            email_message = EmailMessage(subject, message, from_email, [to_email])
+            email_message.send(fail_silently=False) 
             print("Email sent!")
 
 
@@ -85,8 +85,7 @@ class handymanRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 @api_view(['POST'])
 def contact_form(request):
     if request.method == 'POST':
-        serializer_class = ContactFormSerializer
-        serializer = serializer_class(data=request.data)
+        serializer = ContactFormSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
             data = serializer.validated_data
@@ -100,39 +99,37 @@ def contact_form(request):
             <p><strong>Phone Number:</strong> {data.get('phone_number', '')}</p>
             """
 
+            # Initialize the EmailMessage instance
+            email = EmailMessage(
+                subject,
+                email_message,
+                settings.DEFAULT_FROM_EMAIL,
+                ["chuksy3@gmail.com"],
+            )
+            email.content_subtype = 'html' 
             # Check if an image is attached
             if 'image' in request.FILES:
                 image_file = request.FILES['image']
                 try:
-                    # Validate the image size
                     validate_image_file_size(image_file)
+                    pass
                 except ValidationError as e:
                     return Response({'error': str(e)}, status=400)
                 
                 email_message += """
                 <p>This customer is making an inquiry. Attached is the image:</p>
                 """
+                
+                # Attach the image
+                email.attach(image_file.name, image_file.read(), image_file.content_type)
 
-                # Create EmailMessage instance
-                email = EmailMessage(
-                    subject,
-                    email_message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    ["chuksy3@gmail.com"],
-                )
-
-                # Attach image if provided
-                if 'image' in request.FILES:
-                    image_file = request.FILES['image']
-                    email.attach(image_file.name, image_file.read(), image_file.content_type)
-
-                # Send email
-                email.content_subtype = 'html'
-                email.send(fail_silently=False)
+            # Send email
+            email.send(fail_silently=False)
 
             return Response({'message': 'Your message has been sent.'})
-        return Response(serializer.errors, status=400)
-
+    else:
+        return Response({'error': 'Invalid request'}, status=400)
+    
 
 @api_view(['POST'])
 def forgot_password(request):
@@ -146,21 +143,22 @@ def forgot_password(request):
         if hasattr(user, 'password_reset_token'):
             user.password_reset_token = token
             user.save()
+
         try:
-            EmailMessage(
+            email_message = EmailMessage(
                 'Password Reset Request',
                 f'Use this token to reset your password: {token}',
                 settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
+                [email]
             )
+            email_message.send(fail_silently=False) 
             return Response({'message': 'A password reset token has been sent.', 'user_id': user.pk})
         except Exception as e:
             print(f"Error sending email: {e}")
             return Response({'error': 'Failed to send password reset token. Please try again.'}, status=500)
     except User.DoesNotExist:
-        return Response({'message': 'If an account with that email exists, a password reset token has been sent.'})
-
+        return Response({'error': 'User not found!'}, status=404)
+    
 
 @api_view(['POST'])
 def verify_token(request):
@@ -191,24 +189,36 @@ def reset_password(request):
     confirm_password = request.data.get('confirm_password')
     user_id = request.data.get('user_id')
 
-    if not new_password and not confirm_password:
-        return Response({'error': 'New password is required.'}, status=400)
-    if not confirm_password:
-        return Response({'error': 'Confirm password is required.'}, status=400)
-    if not user_id:
-        return Response({'error': 'User ID is required.'}, status=400)
-
+    if not new_password or not confirm_password:
+        return Response({'error': 'Both new password and confirm password are required.'}, status=400)
     if new_password != confirm_password:
         return Response({'error': 'Passwords do not match.'}, status=400)
+    if not user_id:
+        return Response({'error': 'User ID is required.'}, status=400)
 
     try:
         user = User.objects.get(pk=user_id)
 
         if user.token_verified:
-           user.set_password(new_password)
-           user.password_reset_token = None
-           user.save()
-           return Response({'success': 'Password has been reset successfully.'})
+            user.set_password(new_password)
+            user.password_reset_token = None
+            user.save()
+
+            html_content = f"""
+            <p>Hello {user.name},</p>
+            <p>Your password has been successfully reset.</p>
+            <p>If you did not perform this action, please contact our support team immediately.</p>
+            """
+            email_message = EmailMessage(
+                'Password Reset Successful',
+                html_content,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email]
+            )
+            email_message.content_subtype = "html" 
+            email_message.send(fail_silently=False) 
+
+            return Response({'success': 'Password has been reset successfully.'})
         else:
             return Response({'error': 'Token not verified. Please verify your token.'}, status=400)
     except (ValueError, TypeError, User.DoesNotExist):
