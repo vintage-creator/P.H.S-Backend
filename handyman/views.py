@@ -53,27 +53,28 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
     def send_handyman_info_email(self, handyman_id, to_email):
         handyman, user = get_handyman_user_info(handyman_id)
         if handyman and user:
-            subject = 'Handyman Service Details'
-            message = f"""
-            Hello,
+           subject = 'Handyman Service Details'
+           message = f"""
+           <p>Hello,</p>
 
-            Here are the details of the Handyman service a client requested:
+           <p>Here are the details of the Handyman service a client requested:</p>
 
-            Service Name: {handyman.service_name}
-            Time: {handyman.time}
-            Address: {handyman.address}
-            Date: {handyman.date}
+           <p>Service Name: {handyman.service_name}</p>
+           <p>Time: {handyman.time}</p>
+           <p>Address: {handyman.address}</p>
+           <p>Date: {handyman.date}</p>
 
-            Requested by:
-            Name: {user.name}
-            Email: {user.email}
-            Phone: {user.phone_number}
-            """
+           <p>Requested by:</p>
+           <p>Name: {user.name}</p>
+           <p>Email: {user.email}</p>
+           <p>Phone: {user.phone_number}</p>
+           """
 
-            from_email =  settings.DEFAULT_FROM_EMAIL
-            email_message = EmailMessage(subject, message, from_email, [to_email])
-            email_message.send(fail_silently=False) 
-            print("Email sent!")
+           from_email = settings.DEFAULT_FROM_EMAIL
+           email_message = EmailMessage(subject, message, from_email, [to_email])
+           email_message.content_subtype = 'html'
+           email_message.send(fail_silently=False)
+           print("Email sent!")
 
 
 class handymanRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
