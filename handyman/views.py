@@ -67,7 +67,7 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         <p>Email: {user.email}</p>
         <p>Phone: {user.phone_number}</p>
         """
-        from_email = self.format_sender_email(settings.DEFAULT_FROM_EMAIL)
+        from_email = settings.DEFAULT_FROM_EMAIL
         email_message = EmailMessage(subject, message, from_email, [admin_email])
         email_message.content_subtype = 'html'
         email_message.send(fail_silently=False)
@@ -87,7 +87,7 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         <p>Best Regards,</p>
         <p>PHS HQ</p>
         """
-        from_email = f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>"
+        from_email = settings.DEFAULT_FROM_EMAIL
         email_message = EmailMessage(subject, message, from_email, [user.email])
         email_message.content_subtype = 'html'
         email_message.send(fail_silently=False)
@@ -122,7 +122,7 @@ def contact_form(request):
             email = EmailMessage(
                 subject,
                 email_message,
-                f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>",
+                settings.DEFAULT_FROM_EMAIL,
                 ["chuksy3@gmail.com"],
             )
             email.content_subtype = 'html' 
@@ -167,7 +167,7 @@ def forgot_password(request):
             email_message = EmailMessage(
                 'Password Reset Request',
                 f'Use this token to reset your password: {token}',
-                f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>",
+                settings.DEFAULT_FROM_EMAIL,
                 [email]
             )
             email_message.send(fail_silently=False) 
@@ -231,7 +231,7 @@ def reset_password(request):
             email_message = EmailMessage(
                 'Password Reset Successful',
                 html_content,
-                f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>",
+                settings.DEFAULT_FROM_EMAIL,
                 [user.email]
             )
             email_message.content_subtype = "html" 
