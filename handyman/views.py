@@ -50,7 +50,7 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         handyman_instance = serializer.save()
         handyman, user = get_handyman_user_info(handyman_instance.id)
         if handyman and user:
-            self.send_admin_handyman_info_email(handyman, user, 'chuksy3@gmail.com')
+            self.send_admin_handyman_info_email(handyman, user, 'princehandymanservices01@gmail.com')
             self.send_user_confirmation_email(handyman, user)
 
     def send_admin_handyman_info_email(self, handyman, user, admin_email):
@@ -123,7 +123,7 @@ def contact_form(request):
                 subject,
                 email_message,
                 settings.DEFAULT_FROM_EMAIL,
-                ["chuksy3@gmail.com"],
+                ['princehandymanservices01@gmail.com'],
             )
             email.content_subtype = 'html' 
             # Check if an image is attached
