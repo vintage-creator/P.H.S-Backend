@@ -48,33 +48,51 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         handyman_instance = serializer.save()
-        self.send_handyman_info_email(handyman_instance.id, 'chuksy3@gmail.com')
-
-    def send_handyman_info_email(self, handyman_id, to_email):
-        handyman, user = get_handyman_user_info(handyman_id)
+        handyman, user = get_handyman_user_info(handyman_instance.id)
         if handyman and user:
-           subject = 'Handyman Service Details'
-           message = f"""
-           <p>Hello,</p>
+            self.send_admin_handyman_info_email(handyman, user, 'chuksy3@gmail.com')
+            self.send_user_confirmation_email(handyman, user)
 
-           <p>Here are the details of the Handyman service a client requested:</p>
+    def send_admin_handyman_info_email(self, handyman, user, admin_email):
+        subject = 'New Handyman Service Request'
+        message = f"""
+        <p>Hello Admin,</p>
+        <p>A new handyman service has been requested. Here are the details:</p>
+        <p>Service Name: {handyman.service_name}</p>
+        <p>Time: {handyman.time}</p>
+        <p>Address: {handyman.address}</p>
+        <p>Date: {handyman.date}</p>
+        <p>Requested by:</p>
+        <p>Name: {user.name}</p>
+        <p>Email: {user.email}</p>
+        <p>Phone: {user.phone_number}</p>
+        """
+        from_email = self.format_sender_email(settings.DEFAULT_FROM_EMAIL)
+        email_message = EmailMessage(subject, message, from_email, [admin_email])
+        email_message.content_subtype = 'html'
+        email_message.send(fail_silently=False)
+        print("Admin notification email sent!")
 
-           <p>Service Name: {handyman.service_name}</p>
-           <p>Time: {handyman.time}</p>
-           <p>Address: {handyman.address}</p>
-           <p>Date: {handyman.date}</p>
+    def send_user_confirmation_email(self, handyman, user):
+        subject = 'Handyman Service Request Confirmation'
+        message = f"""
+        <p>Dear {user.name},</p>
+        <p>We have received your request for our handyman service. Here are the details:</p>
+        <p>Service Name: {handyman.service_name}</p>
+        <p>Time: {handyman.time}</p>
+        <p>Address: {handyman.address}</p>
+        <p>Date: {handyman.date}</p>
+        <p>We will reach out to you soon to confirm the details and finalize the arrangements.</p>
+        <p>Thank you for choosing our services!</p>
+        <p>Best Regards,</p>
+        <p>PHS HQ</p>
+        """
+        from_email = f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>"
+        email_message = EmailMessage(subject, message, from_email, [user.email])
+        email_message.content_subtype = 'html'
+        email_message.send(fail_silently=False)
+        print("User confirmation email sent!")
 
-           <p>Requested by:</p>
-           <p>Name: {user.name}</p>
-           <p>Email: {user.email}</p>
-           <p>Phone: {user.phone_number}</p>
-           """
-
-           from_email = settings.DEFAULT_FROM_EMAIL
-           email_message = EmailMessage(subject, message, from_email, [to_email])
-           email_message.content_subtype = 'html'
-           email_message.send(fail_silently=False)
-           print("Email sent!")
 
 
 class handymanRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
@@ -99,12 +117,12 @@ def contact_form(request):
             <p><strong>Message:</strong> {data['message']}</p>
             <p><strong>Phone Number:</strong> {data.get('phone_number', '')}</p>
             """
-
+            
             # Initialize the EmailMessage instance
             email = EmailMessage(
                 subject,
                 email_message,
-                settings.DEFAULT_FROM_EMAIL,
+                f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>",
                 ["chuksy3@gmail.com"],
             )
             email.content_subtype = 'html' 
@@ -149,7 +167,7 @@ def forgot_password(request):
             email_message = EmailMessage(
                 'Password Reset Request',
                 f'Use this token to reset your password: {token}',
-                settings.DEFAULT_FROM_EMAIL,
+                f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>",
                 [email]
             )
             email_message.send(fail_silently=False) 
@@ -213,7 +231,7 @@ def reset_password(request):
             email_message = EmailMessage(
                 'Password Reset Successful',
                 html_content,
-                settings.DEFAULT_FROM_EMAIL,
+                f"PHS HQ <{settings.DEFAULT_FROM_EMAIL}>",
                 [user.email]
             )
             email_message.content_subtype = "html" 
