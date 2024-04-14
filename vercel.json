@@ -1,26 +1,19 @@
 {
     "builds": [
       {
-        "src": "requirements.txt",
+        "src": "handyman_project/wsgi.py",
         "use": "@vercel/python",
         "config": {
-          "maxLambdaSize": "50mb"
+          "maxLambdaSize": "50mb",
+          "runtime": "python3.9"
         }
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "handyman_project.wsgi:application"
+        "dest": "handyman_project/wsgi.py"
       }
-    ],
-    "env": {
-      "DJANGO_SETTINGS_MODULE": "handyman_project.settings"
-    },
-    "build": {
-      "env": {
-        "DJANGO_SETTINGS_MODULE": "handyman_project.settings"
-      }
-    }
+    ]
   }
   
