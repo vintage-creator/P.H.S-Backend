@@ -1,11 +1,12 @@
 {
+  "version": 2,
     "builds": [
       {
         "src": "handyman_project/wsgi.py",
         "use": "@vercel/python",
         "config": {
           "maxLambdaSize": "50mb",
-          "runtime": "python3.9"
+          "runtime": "Python3.9"
         }
       }
     ],
