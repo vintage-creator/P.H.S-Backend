@@ -26,4 +26,5 @@ urlpatterns = [
     path('', include('handyman.urls')),
     path('auth/', include('djoser.urls')), #Signup endpoint
     path('authtoken/', include('djoser.urls.authtoken')), #Signin endpoint
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
