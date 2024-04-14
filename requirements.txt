@@ -6,7 +6,7 @@ cryptography==42.0.5
 defusedxml==0.8.0rc2
 dj-database-url==2.1.0
 dj-rest-auth==5.0.2
-Django==4.2.11
+Django==4.2.1
 django-allauth==0.61.1
 django-cors-headers==4.3.1
 django-templated-mail==1.1.1
@@ -18,7 +18,7 @@ idna==3.6
 oauthlib==3.2.2
 packaging==24.0
 pillow==10.3.0
-psycopg2-binary==2.9.9
+psycopg2==2.9.9
 pycparser==2.21
 PyJWT==2.8.0
 python-dotenv==1.0.1
