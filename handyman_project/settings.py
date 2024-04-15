@@ -48,7 +48,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG") == "True"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com", ".vercel.app"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com", ".vercel.app", "princehandymanservices.com", "princehandymanservices.ie", "www.princehandymanservices.com", "www.princehandymanservices.ie"]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
