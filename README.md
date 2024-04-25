@@ -49,4 +49,4 @@
 <h2 id="database">Database</h2>
 <p>The backend server utilizes PostgreSQL as its database system, ensuring reliability and scalability for storing user information, service appointments, and other relevant data.</p>
 <p>For more information on endpoints, including request and response formats, refer to our comprehensive API documentation or reach out to our support team. Our backend is built with Python's Django REST Framework, offering robust and scalable solutions for managing handyman service appointments and user interactions.</p>
-<p>Base URL for the endpoints: <a href="https://princehandymanservices.onrender.com">https://princehandymanservices.onrender.com</a></p>
+
