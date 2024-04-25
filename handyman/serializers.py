@@ -10,10 +10,15 @@ class handyman_serializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Handyman
+        fields = ['time', 'date']
+
 
 class CustomUserCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User  # Use the custom user model
+        model = User 
         fields = ['email', 'name', 'phone_number', 'password'] 
         extra_kwargs = {
             'password': {'write_only': True}}

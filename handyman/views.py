@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.conf import settings
-from rest_framework import generics
+from rest_framework import generics, status
 from .models import Handyman
 from .permissions import CustomPermission
-from .serializers import handyman_serializer, ContactFormSerializer
+from .serializers import handyman_serializer, ContactFormSerializer, AppointmentSerializer
 from django.core.mail import EmailMessage
 from rest_framework.decorators import api_view
 from rest_framework.decorators import parser_classes
@@ -43,7 +43,6 @@ class GoogleLogin(SocialLoginView):
 
 class handymanListCreateAPIView(generics.ListCreateAPIView):
     queryset = Handyman.objects.all()
-    serializer_class = handyman_serializer
     permission_classes = [CustomPermission]
 
     def perform_create(self, serializer):
@@ -93,7 +92,17 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         email_message.send(fail_silently=False)
         print("User confirmation email sent!")
 
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return handyman_serializer
+        return AppointmentSerializer
 
+    
+    def get(self, request, *args, **kwargs):
+        appointments = self.get_queryset()
+        serializer = self.get_serializer(appointments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
 class handymanRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Handyman.objects.all()
