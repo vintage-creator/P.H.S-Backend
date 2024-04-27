@@ -49,7 +49,7 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         handyman_instance = serializer.save()
         handyman, user = get_handyman_user_info(handyman_instance.id)
         if handyman and user:
-            self.send_admin_handyman_info_email(handyman, user, 'princehandymanservices01@gmail.com')
+            self.send_admin_handyman_info_email(handyman, user, 'canipf.ng@gmail.com')
             self.send_user_confirmation_email(handyman, user)
 
     def send_admin_handyman_info_email(self, handyman, user, admin_email):
