@@ -127,8 +127,8 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         # Construct response data with date and time for available time slots
         response_data = [{'date': current_date.strftime('%Y-%m-%d'), 'time': time} for time in remaining_time_slots]
         
-        # Filter user bookings made on the current date
-        user_bookings = self.get_queryset().filter(date=current_date)
+        # Retrieve user bookings from the database for current and future dates
+        user_bookings = self.get_queryset().filter(date__gte=current_date)
 
         # Serialize user bookings
         user_bookings_serializer = self.get_serializer(user_bookings, many=True)
@@ -137,7 +137,6 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         response_data += user_bookings_serializer.data
 
         return Response(response_data, status=status.HTTP_200_OK)
-
 
 class handymanRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Handyman.objects.all()
