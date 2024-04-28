@@ -108,8 +108,8 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
             "05:00PM", "06:00PM", "07:00PM"
         ]
 
-        current_date = datetime.now().date()
         current_time = datetime.now().time()
+        current_date = datetime.now().date()
 
         # Convert time slots to datetime objects
         available_time_slots = [datetime.strptime(time_slot, '%I:%M%p').time() for time_slot in time_slots]
@@ -124,9 +124,10 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         # Filter out time slots not in filtered_time_slots
         remaining_time_slots = [time_slot.strftime('%I:%M%p') for time_slot in available_time_slots if time_slot.strftime('%I:%M%p') not in filtered_time_slots]
 
-        response_data = [{'time': time} for time in remaining_time_slots]
+        # Construct response data with date and time
+        response_data = [{'date': current_date.strftime('%Y-%m-%d'), 'time': time} for time in remaining_time_slots]
         
-        return Response(response_data, status=status.HTTP_200_OK) 
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class handymanRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
