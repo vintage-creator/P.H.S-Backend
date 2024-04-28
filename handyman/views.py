@@ -51,7 +51,7 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         handyman_instance = serializer.save()
         handyman, user = get_handyman_user_info(handyman_instance.id)
         if handyman and user:
-            self.send_admin_handyman_info_email(handyman, user, 'canipf.ng@gmail.com')
+            self.send_admin_handyman_info_email(handyman, user, 'princehandymanservices01@gmail.com')
             self.send_user_confirmation_email(handyman, user)
 
     def send_admin_handyman_info_email(self, handyman, user, admin_email):
@@ -108,8 +108,8 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
             "05:00PM", "06:00PM", "07:00PM"
         ]
 
-        current_time = datetime.now().time()
         current_date = datetime.now().date()
+        current_time = datetime.now().time()
 
         # Convert time slots to datetime objects
         available_time_slots = [datetime.strptime(time_slot, '%I:%M%p').time() for time_slot in time_slots]
@@ -124,9 +124,18 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         # Filter out time slots not in filtered_time_slots
         remaining_time_slots = [time_slot.strftime('%I:%M%p') for time_slot in available_time_slots if time_slot.strftime('%I:%M%p') not in filtered_time_slots]
 
-        # Construct response data with date and time
+        # Construct response data with date and time for available time slots
         response_data = [{'date': current_date.strftime('%Y-%m-%d'), 'time': time} for time in remaining_time_slots]
         
+        # Filter user bookings made on the current date
+        user_bookings = self.get_queryset().filter(date=current_date)
+
+        # Serialize user bookings
+        user_bookings_serializer = self.get_serializer(user_bookings, many=True)
+        
+        # Combine available time slots and user bookings
+        response_data += user_bookings_serializer.data
+
         return Response(response_data, status=status.HTTP_200_OK)
 
 
