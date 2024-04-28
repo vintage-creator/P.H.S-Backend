@@ -42,6 +42,7 @@ class GoogleLogin(SocialLoginView):
         return Response(response_data)
 
 
+
 class handymanListCreateAPIView(generics.ListCreateAPIView):
     queryset = Handyman.objects.all()
     permission_classes = [CustomPermission]
@@ -93,45 +94,40 @@ class handymanListCreateAPIView(generics.ListCreateAPIView):
         email_message.send(fail_silently=False)
         print("User confirmation email sent!")
 
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return handyman_serializer
+        return AppointmentSerializer
+
+    
     def get(self, request, *args, **kwargs):
-        # Define time slots available in the frontend
         time_slots = [
-            "08:00AM", "09:00AM", "10:00AM", "11:00AM", "12:00PM",
-            "01:00PM", "02:00PM", "03:00PM", "04:00PM", "05:00PM",
-            "06:00PM", "07:00PM"
+            "08:00AM", "09:00AM", "10:00AM",
+            "11:00AM", "12:00PM", "01:00PM",
+            "02:00PM", "03:00PM", "04:00PM",
+            "05:00PM", "06:00PM", "07:00PM"
         ]
 
-        # Get the current date and time
         current_date = datetime.now().date()
         current_time = datetime.now().time()
 
-        # Create Handyman objects for unbooked times
-        for time_str in time_slots:
-            # Convert time string to datetime object
-            time_obj = datetime.strptime(time_str, '%I:%M%p').time()
+        # Convert time slots to datetime objects
+        available_time_slots = [datetime.strptime(time_slot, '%I:%M%p').time() for time_slot in time_slots]
 
-            # Check if the time is unbooked (before current time)
-            if current_date == datetime.now().date() and time_obj < current_time:
-                # Time is in the past, no need to create Handyman object
-                continue
+        filtered_time_slots = []
 
-            # Check if Handyman object already exists for this time slot and date
-            if not Handyman.objects.filter(date=current_date, time=time_obj).exists():
-                # Create Handyman object for admin
-                Handyman.objects.create(
-                    user="aae29fed-3027-443f-8810-359f6b786fa0",
-                    service_name="Admin Service",
-                    time=time_obj,
-                    address="Admin Address",
-                    date=current_date
-                )
+        # Include time slots from current time onwards
+        for time_slot in available_time_slots:
+            if current_time <= time_slot:
+                filtered_time_slots.append(time_slot.strftime('%I:%M%p'))
 
-        # Get all Handyman objects for the current date
-        appointments = Handyman.objects.filter(date=current_date)
-        serializer = AppointmentSerializer(appointments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # Filter out time slots not in filtered_time_slots
+        remaining_time_slots = [time_slot.strftime('%I:%M%p') for time_slot in available_time_slots if time_slot.strftime('%I:%M%p') not in filtered_time_slots]
 
-    
+        response_data = [{'time': time} for time in remaining_time_slots]
+        
+        return Response(response_data, status=status.HTTP_200_OK) 
+
 
 class handymanRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Handyman.objects.all()
